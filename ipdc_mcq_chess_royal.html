@@ -1,0 +1,355 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ebony:#1a1209;
+  --ivory:#faf6ed;
+  --sq-dark:#3d2b0f;
+  --sq-light:#e8c97a;
+  --gold:#c9982a;
+  --gold2:#a07820;
+  --rim:#2a1d06;
+  --cream:#f5edd8;
+  --parch:#ede0bb;
+  --ink:#1c130a;
+  --muted:#6b5230;
+  --faint:#9a7f58;
+  --border-col:rgba(100,70,20,0.22);
+  --correct-bg:#e8f2e3;
+  --correct-fg:#1e4d12;
+  --wrong-bg:#f5e3e3;
+  --wrong-fg:#6b1212;
+  --reveal-bg:#f0ead8;
+}
+body{background:var(--ivory);font-family:'EB Garamond',Georgia,serif;color:var(--ink)}
+
+.shell{background:var(--ivory);border:3px solid var(--rim);position:relative}
+.shell::before,.shell::after{content:'';display:block;height:14px;background:repeating-linear-gradient(90deg,var(--sq-dark) 0 24px,var(--sq-light) 24px 48px)}
+
+.crown-bar{background:var(--rim);padding:26px 32px 20px;text-align:center;position:relative;overflow:hidden}
+.crown-bar::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(201,152,42,0.06) 0 2px,transparent 2px 20px)}
+.crown-pieces{font-size:26px;letter-spacing:12px;color:var(--gold);margin-bottom:10px;display:block}
+.crown-title{font-family:'Cinzel',serif;font-size:30px;font-weight:700;color:var(--sq-light);letter-spacing:2px;line-height:1.15}
+.crown-sub{font-size:15px;color:var(--faint);font-style:italic;margin-top:6px;letter-spacing:0.3px}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);background:var(--cream);border-bottom:2px solid var(--gold)}
+.stat-cell{padding:14px 8px;text-align:center;border-right:1px solid var(--border-col)}
+.stat-cell:last-child{border-right:none}
+.stat-val{font-family:'Cinzel',serif;font-size:26px;font-weight:700;color:var(--gold2);line-height:1}
+.stat-lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--faint);margin-top:3px}
+
+.prog-track{background:var(--parch);border-bottom:1px solid var(--border-col);padding:10px 28px}
+.prog-rail{height:7px;background:var(--parch);border:1px solid var(--border-col);border-radius:0}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold));transition:width 0.5s ease}
+
+.modes{display:flex;gap:0;background:var(--parch);border-bottom:1px solid var(--border-col)}
+.mode-btn{flex:1;font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;padding:10px;background:transparent;border:none;border-right:1px solid var(--border-col);cursor:pointer;color:var(--faint);transition:all 0.2s}
+.mode-btn:last-child{border-right:none}
+.mode-btn.on{background:var(--gold);color:var(--rim);font-weight:600}
+.mode-btn:hover:not(.on){background:var(--sq-light);color:var(--ink)}
+
+.qbody{padding:28px 32px 8px}
+
+.qcard{background:#fff9ee;border:1px solid var(--border-col);padding:24px 26px;margin-bottom:0;position:relative}
+.qcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--gold)}
+.piece-bg{position:absolute;right:18px;top:12px;font-size:48px;color:var(--sq-light);line-height:1;pointer-events:none;font-family:serif}
+
+.q-meta{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.q-badge{font-family:'Cinzel',serif;font-size:12px;font-weight:700;background:var(--gold);color:#fff8e0;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid var(--gold2)}
+.q-text{font-size:19px;font-weight:500;line-height:1.45;color:var(--ink)}
+
+.opts{display:grid;gap:9px;margin-top:4px}
+.opt{display:flex;align-items:flex-start;gap:12px;background:transparent;border:1.5px solid var(--border-col);padding:11px 14px;cursor:pointer;font-family:'EB Garamond',Georgia,serif;font-size:17px;color:var(--ink);text-align:left;transition:all 0.18s;width:100%;border-radius:2px}
+.opt:hover:not(:disabled){background:rgba(232,201,122,0.2);border-color:var(--gold)}
+.opt-lbl{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--faint);min-width:26px;height:26px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;letter-spacing:0}
+.opt.correct{background:var(--correct-bg);border-color:var(--correct-fg);color:var(--correct-fg)}
+.opt.correct .opt-lbl{color:var(--correct-fg);border-color:var(--correct-fg)}
+.opt.wrong{background:var(--wrong-bg);border-color:var(--wrong-fg);color:var(--wrong-fg)}
+.opt.wrong .opt-lbl{color:var(--wrong-fg);border-color:var(--wrong-fg)}
+.opt.show-ans{background:rgba(232,201,122,0.25);border-color:var(--gold2);color:var(--sq-dark)}
+.opt.show-ans .opt-lbl{color:var(--gold2);border-color:var(--gold2)}
+.opt:disabled{cursor:default}
+
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:14px;padding:7px 14px;margin-top:14px;font-style:italic;border-left:4px solid;border-radius:0}
+.chip.ok{background:var(--correct-bg);color:var(--correct-fg);border-color:var(--correct-fg)}
+.chip.err{background:var(--wrong-bg);color:var(--wrong-fg);border-color:var(--wrong-fg)}
+.chip.hint{background:var(--reveal-bg);color:var(--gold2);border-color:var(--gold)}
+
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 24px;background:var(--ivory)}
+.nbtn{font-family:'Cinzel',serif;font-size:13px;font-weight:600;letter-spacing:0.5px;padding:10px 22px;background:var(--cream);border:2px solid var(--gold2);color:var(--rim);cursor:pointer;border-radius:2px;transition:all 0.18s}
+.nbtn:hover:not(:disabled){background:var(--sq-light)}
+.nbtn:disabled{opacity:0.3;cursor:default}
+.nbtn.primary{background:var(--gold);color:var(--rim);border-color:var(--rim)}
+.nbtn.primary:hover:not(:disabled){background:var(--gold2)}
+.q-pos{font-family:'Cinzel',serif;font-size:13px;color:var(--faint)}
+
+.mini-nav{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;padding:10px 28px 0}
+.dot{width:22px;height:22px;border-radius:2px;font-family:'Cinzel',serif;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--border-col);background:var(--parch);color:var(--faint);transition:all 0.15s}
+.dot:hover{border-color:var(--gold)}
+.dot.cur{border-color:var(--gold);background:var(--gold);color:var(--rim)}
+.dot.c{background:var(--correct-bg);border-color:var(--correct-fg);color:var(--correct-fg)}
+.dot.w{background:var(--wrong-bg);border-color:var(--wrong-fg);color:var(--wrong-fg)}
+
+.result-wrap{padding:48px 32px;text-align:center;background:var(--ivory)}
+.r-icon{font-size:72px;line-height:1;margin-bottom:16px;color:var(--gold)}
+.r-title{font-family:'Cinzel',serif;font-size:32px;font-weight:700;color:var(--rim);letter-spacing:1.5px;margin-bottom:6px}
+.r-sub{font-size:17px;color:var(--faint);font-style:italic;margin-bottom:32px}
+.r-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:320px;margin:0 auto 28px}
+.r-card{background:#fff9ee;border:1px solid var(--border-col);padding:20px 16px;text-align:center}
+.r-card .rv{font-family:'Cinzel',serif;font-size:32px;font-weight:700;color:var(--gold2)}
+.r-card .rl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--faint);margin-top:4px}
+.rating{background:var(--rim);color:var(--sq-light);padding:18px 30px;max-width:400px;margin:0 auto 32px;font-family:'Cinzel',serif;font-size:17px;letter-spacing:0.5px;line-height:1.6}
+.rating small{display:block;font-family:'EB Garamond',serif;font-size:14px;font-style:italic;color:var(--faint);margin-top:4px;font-weight:400}
+.answer-map{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:480px;margin:0 auto 32px}
+.amdot{width:20px;height:20px;border-radius:2px;font-size:9px;font-family:'Cinzel',serif;display:flex;align-items:center;justify-content:center;font-weight:700}
+.amdot.c{background:var(--correct-bg);color:var(--correct-fg);border:1px solid var(--correct-fg)}
+.amdot.w{background:var(--wrong-bg);color:var(--wrong-fg);border:1px solid var(--wrong-fg)}
+.play-again{font-family:'Cinzel',serif;font-size:14px;font-weight:700;letter-spacing:1px;padding:14px 40px;background:var(--gold);color:var(--rim);border:2px solid var(--rim);cursor:pointer;border-radius:2px;transition:all 0.2s}
+.play-again:hover{background:var(--rim);color:var(--gold)}
+</style>
+
+<div class="shell" id="app"></div>
+
+<script>
+const QS=[
+  {q:"Self-awareness means:",o:["Knowing others","Understanding one's own thoughts and emotions","Avoiding problems","Following others"],a:1},
+  {q:"Goal setting helps a person to:",o:["Waste time","Stay focused and motivated","Avoid responsibility","Depend on others"],a:1},
+  {q:"SMART goals stand for:",o:["Simple, Measurable, Accurate, Realistic, Timely","Specific, Measurable, Achievable, Relevant, Time-bound","Small, Modern, Active, Real, True","Strong, Motivated, Active, Responsible, Tough"],a:1},
+  {q:"Habit formation requires:",o:["Consistency","Laziness","Fear","Luck"],a:0},
+  {q:"Positive mindset helps in:",o:["Creating stress","Facing challenges confidently","Ignoring reality","Avoiding work"],a:1},
+  {q:"Stress management includes:",o:["Overthinking","Exercise and relaxation","Anger","Isolation"],a:1},
+  {q:"Discipline means:",o:["Punishment","Self-control and responsibility","Freedom without rules","Fear of authority"],a:1},
+  {q:"Personal development mainly focuses on:",o:["External appearance","Holistic growth","Competition only","Wealth only"],a:1},
+  {q:"Emotional stability helps a person to:",o:["React impulsively","Maintain balance during difficulties","Avoid emotions","Become aggressive"],a:1},
+  {q:"Self-transformation begins with:",o:["Changing others","Self-reflection","Complaining","Comparison"],a:1},
+  {q:"Time management helps to:",o:["Increase confusion","Improve productivity","Waste energy","Reduce learning"],a:1},
+  {q:"A positive attitude leads to:",o:["Success and happiness","Fear","Laziness","Failure"],a:0},
+  {q:"Healthy lifestyle includes:",o:["Junk food only","Regular exercise and proper sleep","Overworking","Stress"],a:1},
+  {q:"Self-confidence grows through:",o:["Practice and achievements","Avoiding challenges","Fear","Isolation"],a:0},
+  {q:"Personal goals should be:",o:["Unrealistic","Clear and achievable","Random","Forced"],a:1},
+  {q:"Meditation helps in:",o:["Increasing stress","Mental peace","Anger","Distraction"],a:1},
+  {q:"Growth mindset means:",o:["Fixed abilities","Learning through effort","Avoiding failure","Fear of change"],a:1},
+  {q:"Failure should be seen as:",o:["End of success","Learning opportunity","Shame","Weakness"],a:1},
+  {q:"Self-discipline develops through:",o:["Regular practice","Complaints","Excuses","Pressure"],a:0},
+  {q:"Motivation is:",o:["Internal drive to achieve goals","Fear","Punishment","Luck"],a:0},
+  {q:"Personal health affects:",o:["Only physical body","Mental and emotional well-being","Social life only","Nothing"],a:1},
+  {q:"Self-reflection helps to:",o:["Understand strengths and weaknesses","Judge others","Escape problems","Avoid learning"],a:0},
+  {q:"Positive thinking encourages:",o:["Confidence","Negativity","Fear","Stress"],a:0},
+  {q:"Managing emotions requires:",o:["Awareness and control","Suppression","Anger","Ignorance"],a:0},
+  {q:"The main aim of personality development is:",o:["External success only","Balanced personal growth","Competition","Fame"],a:1},
+  {q:"Moral values guide:",o:["Ethical behaviour","Competition","Wealth","Power"],a:0},
+  {q:"Soft skills include:",o:["Programming","Communication and teamwork","Mathematics","Technical tools"],a:1},
+  {q:"Effective communication requires:",o:["Listening skills","Interrupting others","Loud speaking","Ignoring feedback"],a:0},
+  {q:"Teamwork means:",o:["Working alone","Working together toward a common goal","Competing internally","Avoiding responsibility"],a:1},
+  {q:"Leadership involves:",o:["Dominating others","Inspiring and guiding people","Giving orders only","Avoiding decisions"],a:1},
+  {q:"Family harmony depends on:",o:["Conflict","Respect and understanding","Silence","Authority"],a:1},
+  {q:"Financial planning helps to:",o:["Overspend","Manage income and expenses","Create debt","Avoid savings"],a:1},
+  {q:"Citizenship means:",o:["Ignoring society","Rights and responsibilities toward nation","Personal gain","Isolation"],a:1},
+  {q:"Social responsibility includes:",o:["Helping community","Selfish behaviour","Ignoring problems","Competition"],a:0},
+  {q:"National pride encourages:",o:["Social unity","Conflict","Negativity","Isolation"],a:0},
+  {q:"Empathy means:",o:["Judging others","Understanding others' feelings","Ignoring emotions","Criticizing"],a:1},
+  {q:"Decision-making skill requires:",o:["Careful thinking","Impulsiveness","Fear","Confusion"],a:0},
+  {q:"Conflict resolution needs:",o:["Communication and compromise","Aggression","Silence","Blame"],a:0},
+  {q:"Good leadership qualities include:",o:["Responsibility and vision","Ego","Fear","Anger"],a:0},
+  {q:"Active listening means:",o:["Hearing without attention","Listening with understanding","Ignoring speaker","Interrupting"],a:1},
+  {q:"Ethical citizenship promotes:",o:["Corruption","Responsible social behaviour","Self-interest","Conflict"],a:1},
+  {q:"Financial literacy teaches:",o:["Saving and budgeting","Overspending","Borrowing always","Ignoring money"],a:0},
+  {q:"Cooperation helps in:",o:["Group success","Individual conflict","Failure","Isolation"],a:0},
+  {q:"Respecting diversity means:",o:["Accepting differences","Rejecting others","Creating conflict","Ignoring society"],a:0},
+  {q:"The movie The Pursuit of Happyness teaches:",o:["Giving up easily","Perseverance and hard work","Luck matters most","Avoiding struggle"],a:1},
+  {q:"Chris Gardner's character shows:",o:["Determination","Laziness","Fear","Negativity"],a:0},
+  {q:"Success in life depends on:",o:["Continuous effort","Luck only","Wealth only","Comfort zone"],a:0},
+  {q:"Soft skills improve:",o:["Academic and professional relationships","Isolation","Competition only","Fear"],a:0},
+  {q:"Social contribution builds:",o:["Strong society","Conflict","Isolation","Selfishness"],a:0},
+  {q:"Integrated personality development aims at:",o:["Academic marks only","Holistic development of individual and society","Competition only","Personal fame"],a:1},
+  {q:"Self-motivation refers to:",o:["Motivation from others","Inner drive to act","External pressure","Competition"],a:1},
+  {q:"Personal values influence:",o:["Behaviour and decisions","Weather","Technology","Fashion"],a:0},
+  {q:"Self-esteem is:",o:["Respect for oneself","Fear of failure","Pride only","Social status"],a:0},
+  {q:"A person improves personality by:",o:["Continuous learning","Avoiding feedback","Comparing constantly","Ignoring mistakes"],a:0},
+  {q:"Procrastination means:",o:["Completing work early","Delaying tasks unnecessarily","Planning carefully","Working efficiently"],a:1},
+  {q:"Emotional intelligence includes:",o:["Logical reasoning only","Understanding emotions","Physical strength","Memory power"],a:1},
+  {q:"Confidence develops through:",o:["Practice and preparation","Overconfidence","Fear","Luck"],a:0},
+  {q:"Self-control helps in:",o:["Managing impulses","Increasing stress","Avoiding work","Ignoring goals"],a:0},
+  {q:"Personal growth requires:",o:["Comfort zone","Willingness to change","Isolation","Dependence"],a:1},
+  {q:"A daily routine promotes:",o:["Discipline","Confusion","Laziness","Stress"],a:0},
+  {q:"Constructive feedback helps in:",o:["Improvement","Criticism only","Failure","Conflict"],a:0},
+  {q:"Positive affirmation means:",o:["Negative thinking","Encouraging self-statements","Complaining","Judging others"],a:1},
+  {q:"Managing failure teaches:",o:["Resilience","Fear","Weakness","Escape"],a:0},
+  {q:"Stress can be reduced through:",o:["Time planning","Overthinking","Avoidance","Anger"],a:0},
+  {q:"Personal responsibility means:",o:["Blaming others","Owning one's actions","Ignoring duties","Avoiding decisions"],a:1},
+  {q:"Adaptability means:",o:["Resistance to change","Ability to adjust","Fear of learning","Laziness"],a:1},
+  {q:"Self-improvement begins with:",o:["Awareness","Competition","Comparison","Pressure"],a:0},
+  {q:"Optimism means:",o:["Expecting positive outcomes","Ignoring problems","Unrealistic thinking","Fear"],a:0},
+  {q:"Work-life balance helps maintain:",o:["Health and happiness","Stress","Confusion","Isolation"],a:0},
+  {q:"Personal integrity means:",o:["Honesty and strong principles","Success only","Power","Popularity"],a:0},
+  {q:"Decision-making improves through:",o:["Analysis of options","Guessing","Avoidance","Delay"],a:0},
+  {q:"Self-management includes:",o:["Controlling time and behaviour","Controlling others","Competition","Authority"],a:0},
+  {q:"Learning from mistakes leads to:",o:["Growth","Failure","Fear","Regret"],a:0},
+  {q:"Gratitude practice promotes:",o:["Positivity","Negativity","Ego","Stress"],a:0},
+  {q:"Personal vision refers to:",o:["Long-term life direction","Random thinking","Social pressure","Temporary goals"],a:0},
+  {q:"Courtesy in communication means:",o:["Respectful interaction","Loud speaking","Interrupting","Ignoring"],a:0},
+  {q:"Team collaboration requires:",o:["Trust and cooperation","Competition","Ego","Isolation"],a:0},
+  {q:"Ethical behaviour is guided by:",o:["Moral principles","Fear","Power","Authority"],a:0},
+  {q:"Assertive communication means:",o:["Expressing ideas confidently and respectfully","Aggression","Silence","Dominance"],a:0},
+  {q:"Public speaking skill improves through:",o:["Practice","Avoidance","Fear","Silence"],a:0},
+  {q:"Social awareness helps in:",o:["Understanding society","Isolation","Selfishness","Conflict"],a:0},
+  {q:"Leadership through example means:",o:["Practicing what you preach","Giving orders","Criticizing others","Avoiding work"],a:0},
+  {q:"Responsible citizenship includes:",o:["Following laws","Ignoring duties","Self-interest","Conflict"],a:0},
+  {q:"Respect in relationships builds:",o:["Trust","Conflict","Fear","Distance"],a:0},
+  {q:"Volunteer work promotes:",o:["Social contribution","Personal fame","Isolation","Competition"],a:0},
+  {q:"Effective teamwork needs:",o:["Shared responsibility","Individual ego","Silence","Authority"],a:0},
+  {q:"Conflict management aims at:",o:["Peaceful solutions","Winning arguments","Dominance","Avoidance"],a:0},
+  {q:"Financial discipline includes:",o:["Saving regularly","Overspending","Debt creation","Impulse buying"],a:0},
+  {q:"National values promote:",o:["Unity and respect","Division","Conflict","Negativity"],a:0},
+  {q:"Emotional empathy strengthens:",o:["Relationships","Conflict","Isolation","Fear"],a:0},
+  {q:"Professional ethics involve:",o:["Honesty at workplace","Cheating","Laziness","Irresponsibility"],a:0},
+  {q:"Listening is important because it:",o:["Improves understanding","Shows weakness","Creates confusion","Ends communication"],a:0},
+  {q:"Leadership decision-making should be:",o:["Fair and informed","Emotional only","Random","Biased"],a:0},
+  {q:"Positive social behaviour includes:",o:["Helping others","Ignoring society","Competition only","Anger"],a:0},
+  {q:"In The Pursuit of Happyness, perseverance means:",o:["Continuous effort despite hardship","Giving up","Waiting for luck","Avoiding struggle"],a:0},
+  {q:"Chris Gardner's success shows importance of:",o:["Determination and resilience","Comfort zone","Wealth only","Support only"],a:0},
+  {q:"Parenting responsibility shown in the movie reflects:",o:["Commitment and care","Negligence","Escape","Fear"],a:0},
+  {q:"Social responsibility begins with:",o:["Individual actions","Government only","Society only","Luck"],a:0},
+  {q:"Good interpersonal skills help in:",o:["Building networks","Isolation","Conflict","Competition"],a:0},
+  {q:"Integrated personality development ultimately creates:",o:["Responsible and confident individuals","Competitive individuals only","Wealthy people only","Isolated individuals"],a:0},
+];
+
+const LBL=['A','B','C','D'];
+const PIECES=['♔','♕','♖','♗','♘','♙','♚','♛','♜','♝','♞','♟'];
+let cur=0, chosen=new Array(QS.length).fill(-1), mode='quiz';
+
+function rating(s,t){
+  const p=s/t;
+  if(p>=0.9) return {icon:'♔',title:'Grandmaster',desc:'A truly masterful performance.'};
+  if(p>=0.75) return {icon:'♕',title:'International Master',desc:'Commanding control across all positions.'};
+  if(p>=0.6) return {icon:'♖',title:'Candidate Master',desc:'Strong foundations, keep sharpening your game.'};
+  if(p>=0.4) return {icon:'♗',title:'Club Player',desc:'A solid start — the board rewards persistence.'};
+  return {icon:'♟',title:'Beginner',desc:'Every grandmaster once stood where you stand.'};
+}
+
+function render(){
+  const app=document.getElementById('app');
+  const total=QS.length;
+  const done=chosen.filter(x=>x!==-1).length;
+  const correct=chosen.reduce((a,v,i)=>a+(v===QS[i].a?1:0),0);
+  const wrong=chosen.reduce((a,v,i)=>a+(v!==-1&&v!==QS[i].a?1:0),0);
+  const pct=Math.round(done/total*100);
+  const q=QS[cur];
+  const ans=chosen[cur];
+
+  if(mode==='quiz'&&done===total){
+    const r=rating(correct,total);
+    app.innerHTML=`
+      <div class="shell::before"></div>
+      <div class="crown-bar">
+        <span class="crown-pieces">♔ ♕ ♖ ♗ ♘</span>
+        <div class="crown-title">Match Complete</div>
+        <div class="crown-sub">Integrated Personality Development Course</div>
+      </div>
+      <div class="result-wrap">
+        <div class="r-icon">${r.icon}</div>
+        <div class="r-title">${r.title}</div>
+        <div class="r-sub">${r.desc}</div>
+        <div class="r-grid">
+          <div class="r-card"><div class="rv">${correct}</div><div class="rl">Correct</div></div>
+          <div class="r-card"><div class="rv">${wrong}</div><div class="rl">Wrong</div></div>
+          <div class="r-card"><div class="rv">${Math.round(correct/total*100)}%</div><div class="rl">Score</div></div>
+          <div class="r-card"><div class="rv">${total}</div><div class="rl">Total</div></div>
+        </div>
+        <div class="rating">${r.icon} &nbsp; ${r.title} &nbsp; ${r.icon}<small>${r.desc}</small></div>
+        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;color:var(--faint);text-transform:uppercase;margin-bottom:14px">Answer Map</div>
+        <div class="answer-map">${chosen.map((v,i)=>`<div class="amdot ${v===QS[i].a?'c':'w'}">${i+1}</div>`).join('')}</div>
+        <button class="play-again" onclick="restart()">♟ &nbsp; Play Again</button>
+      </div>`;
+    return;
+  }
+
+  const dotsHtml=QS.map((_,i)=>{
+    let cl='dot';
+    if(i===cur) cl+=' cur';
+    else if(chosen[i]===QS[i].a) cl+=' c';
+    else if(chosen[i]!==-1) cl+=' w';
+    return `<div class="${cl}" onclick="jump(${i})">${i+1}</div>`;
+  }).join('');
+
+  const optsHtml=q.o.map((opt,i)=>{
+    let cl='opt';
+    if(mode==='study') cl+=i===q.a?' show-ans':'';
+    else if(ans!==-1){
+      if(i===q.a) cl+=' correct';
+      else if(i===ans) cl+=' wrong';
+    }
+    const dis=(ans!==-1||mode==='study')?'disabled':'';
+    return `<button class="${cl}" onclick="pick(${i})" ${dis}>
+      <span class="opt-lbl">${LBL[i]}</span>
+      <span>${opt}</span>
+    </button>`;
+  }).join('');
+
+  let feedback='';
+  if(mode==='study'){
+    feedback=`<div class="chip hint">♔ &nbsp; Correct answer: ${q.o[q.a]}</div>`;
+  } else if(ans!==-1){
+    feedback=ans===q.a
+      ? `<div class="chip ok">♔ &nbsp; Correct — well played!</div>`
+      : `<div class="chip err">♟ &nbsp; Incorrect — the right move was: ${q.o[q.a]}</div>`;
+  }
+
+  app.innerHTML=`
+    <div class="crown-bar">
+      <span class="crown-pieces">♔ ♕ ♖ ♗ ♘ ♙</span>
+      <div class="crown-title">Integrated Personality Development</div>
+      <div class="crown-sub">100 Questions &nbsp;·&nbsp; Multiple Choice</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-cell"><div class="stat-val">${cur+1}</div><div class="stat-lbl">Question</div></div>
+      <div class="stat-cell"><div class="stat-val">${correct}</div><div class="stat-lbl">Correct</div></div>
+      <div class="stat-cell"><div class="stat-val">${wrong}</div><div class="stat-lbl">Wrong</div></div>
+      <div class="stat-cell"><div class="stat-val">${pct}%</div><div class="stat-lbl">Progress</div></div>
+    </div>
+    <div class="prog-track"><div class="prog-rail"><div class="prog-fill" style="width:${pct}%"></div></div></div>
+    <div class="modes">
+      <button class="mode-btn ${mode==='quiz'?'on':''}" onclick="setMode('quiz')">♟ &nbsp; Quiz Mode</button>
+      <button class="mode-btn ${mode==='study'?'on':''}" onclick="setMode('study')">♔ &nbsp; Study Mode</button>
+    </div>
+    <div class="mini-nav">${dotsHtml}</div>
+    <div class="qbody">
+      <div class="qcard">
+        <div class="piece-bg">${PIECES[cur%12]}</div>
+        <div class="q-meta">
+          <div class="q-badge">${cur+1}</div>
+          <div class="q-text">${q.q}</div>
+        </div>
+        <div class="opts">${optsHtml}</div>
+        ${feedback}
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button class="nbtn" onclick="go(-1)" ${cur===0?'disabled':''}>&#8592; Previous</button>
+      <div class="q-pos">${cur+1} of ${total}</div>
+      ${cur<total-1
+        ? `<button class="nbtn primary" onclick="go(1)">Next &#8594;</button>`
+        : `<button class="nbtn primary" onclick="finish()">Finish &#10003;</button>`}
+    </div>`;
+}
+
+function pick(i){
+  if(mode==='study'||chosen[cur]!==-1) return;
+  chosen[cur]=i;
+  render();
+}
+function go(d){cur=Math.max(0,Math.min(QS.length-1,cur+d));render();}
+function jump(i){cur=i;render();}
+function setMode(m){
+  mode=m;
+  if(m==='study') chosen=new Array(QS.length).fill(-1);
+  render();
+}
+function finish(){
+  chosen=chosen.map(v=>v===-1?-2:v);
+  render();
+}
+function restart(){cur=0;chosen=new Array(QS.length).fill(-1);mode='quiz';render();}
+render();
+</script>
